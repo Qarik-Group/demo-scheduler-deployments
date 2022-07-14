@@ -1,0 +1,33 @@
+---
+releases:
+- name: routing
+  version: latest
+- name: bpm
+  version: latest
+---
+- type: replace
+  path: /instance_groups/0/jobs/-
+  value:
+    name: route_registrar
+    release: routing
+    consumes:
+      nats:
+        from: nats
+        deployment: dev-cf # <cf-deployment-name>
+    properties:
+      nats:
+        machines: [10.4.20.17] # <nats-host-ips>] 
+      route_registrar:
+        #logging_level: debug # <route_registrar.log_level>
+        routes:
+        - name: scheduler
+          port: 8000 # <rmq-dashboard-port>
+          registration_interval: 10s
+          uris:
+            - scheduler.system.codex.starkandwayne.com # <name>.<system-domain>
+        host: system.codex.starkandwayne.com # <system-domain>
+- type: replace
+  path: /instance_groups/0/jobs/-
+  value:
+    name: bpm
+    release: bpm
